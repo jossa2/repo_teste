@@ -1,0 +1,90 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+
+<form name="node_add" id="node_add">
+Add Time Slot Date <input type="text" name="time_slot" id="time_slot" value="">
+
+<input type="hidden" name="id_to_update" id="id_to_update">
+<input type="button" class="add_update" value="Add or Update">
+</form>
+
+
+<table id="example" class="display" width="100%" cellspacing="0">
+	<thead>
+		<tr>
+			<th>Book Request Date</th>
+			<th>Seller name</th>
+			<th>Accepted / Rejected </th>
+			<th>Action</th>
+		</tr>
+	</thead>
+</table>
+
+<script>
+$(document).ready(function() {
+	user_list = $('#example').DataTable( {
+		"processing": true,
+		"serverSide": true,
+		"lengthChange": false,
+		"columns": [
+			{ "orderable": false, "searchable": false, "data":"request_date", "width":"25%" },
+			{ "orderable": false, "searchable": false, "data":"seller_name", "width":"25%" },
+			{ "orderable": false, "searchable": false, "data":"accept_reject", "width":"25%" },
+			{ "orderable": false, "searchable": false, "data":"action", "width":"25%" },
+		],
+		"searching": false,
+		"ajax": "http://localhost:3000/get_bookrequest"
+	});
+
+	$(document).on("click",'.add_update', function(e) {
+		
+			url = "http://localhost:3000/add_timeslot";
+		
+		var data = $("#node_add").serialize();
+		$.ajax({
+			type: "post",
+			dataType:"json",
+			cache: false,
+			data : data,
+			url: url,
+			success: function(res)
+			{
+				
+				alert('Record Inserted Successfully');
+				
+				user_list.draw('full-hold');
+				$('#time_slot').val('');
+
+			},
+			error: function(jqXHR, textStatus, errorThrown)
+			{
+				console.log(textStatus , errorThrown);
+			},
+			complete: function() {
+			}
+		});
+	});
+
+
+	$(document).on("click",'.update', function(e) {
+		$.ajax({
+			type: "get",
+			dataType:"json",
+			cache: false,
+			url: "http://localhost:3000/get_user_by_id/"+$(this).attr('value_id'),
+			success: function(res)
+			{
+				$('#accept_reject').val(res[0].accept_reject);
+				$('#id_to_update').val(res[0].id);
+			},
+			error: function(jqXHR, textStatus, errorThrown)
+			{
+				console.log(textStatus , errorThrown);
+			},
+			complete: function() {
+			}
+		});
+	});
+});
+</script>
